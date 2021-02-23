@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/penny_wiser
+    username: postgres
+    password: postgres
+    # JPA properties
+  jpa:
+    hibernate:
+        ddl-auto: none # When you launch the application for the first time - switch "none" at "create"
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+  liquibase:
+    change-log: classpath:db.changelog/changelog-master.xml

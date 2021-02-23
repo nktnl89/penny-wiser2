@@ -1,0 +1,95 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="create_item_table" author="nktnl89@gmail.com">
+        <createTable tableName="item">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="character varying">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="create_entry_table" author="nktnl89@gmail.com">
+        <createTable tableName="entry">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="processed" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="double">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="entry" baseColumnNames="item_id" constraintName="entry_to_item_fk"
+                                 referencedTableName="item"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet id="create_plan_table" author="nktnl89@gmail.com">
+        <createTable tableName="plan">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="item_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_to" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="closed" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="plan" baseColumnNames="item_id" constraintName="plan_to_item_fk"
+                                 referencedTableName="item"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="rename_closed_column_plan" author="nktnl89@gmail.com">
+        <renameColumn tableName="plan" oldColumnName="closed" newColumnName="active"/>
+    </changeSet>
+
+    <changeSet id="added_default_items" author="nktnl89@gmail.com">
+        <sql dbms="postgresql" endDelimiter="/">
+            do $$
+            declare
+            item_names constant character varying[] =
+            ARRAY['Авто','Коты','Кредит','Кварплата','Отложения','ЧД','Прочее'];
+            item_name character varying;
+            begin
+            foreach item_name in ARRAY item_names
+            loop
+            insert into item(name) values(item_name);
+            end loop;
+            end;
+            $$;
+            /
+        </sql>
+    </changeSet>
+
+    <changeSet id="add_active_column_to_item_table" author="nktnl89@gmail.com">
+        <addColumn tableName="item">
+            <column name="active" type="boolean"/>
+        </addColumn>
+        <update tableName="item">
+            <column name="active" value="true"/>
+        </update>
+        <addNotNullConstraint tableName="item" columnName="active"/>
+    </changeSet>
+
+    <changeSet id="add_sum_to_plan_table" author="nktnl89@gmail.com">
+        <addColumn tableName="plan">
+            <column name="sum" type="double">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
